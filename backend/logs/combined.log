@@ -1,0 +1,404 @@
+2026-01-28 09:23:59 [error]: Failed to start server {"error":{"name":"PrismaClientInitializationError","clientVersion":"5.22.0","errorCode":"P1000"}}
+2026-01-28 09:25:13 [info]: Database connected
+2026-01-28 09:25:13 [info]: Server running on port 4000
+2026-01-28 09:25:13 [info]: Environment: development
+2026-01-28 09:27:47 [info]: Incoming request {"method":"GET","path":"/health","ip":"::1"}
+2026-01-28 09:27:47 [info]: Incoming request {"method":"GET","path":"/favicon.ico","ip":"::1"}
+2026-01-28 09:41:21 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-28 10:20:33 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-28 10:27:50 [error]: Prisma Error {"error":{"timestamp":"2026-01-28T04:57:50.617Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-28 10:58:39 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-28 10:58:39 [warn]: Invalid token {"error":"invalid signature"}
+2026-01-28 10:58:39 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-28 10:58:39 [warn]: Invalid token {"error":"invalid signature"}
+2026-01-28 10:58:39 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-28 10:58:39 [warn]: Invalid token {"error":"invalid signature"}
+2026-01-28 10:58:39 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-28 10:58:39 [warn]: Invalid token {"error":"invalid signature"}
+2026-01-28 11:09:53 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-28 11:09:54 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:34:36\n\n  31   return;\n  32 }\n  33 \n→ 34 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-28T05:39:54.596Z"}}
+2026-01-28 11:09:54 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-28 11:11:44 [info]: Database connected
+2026-01-28 11:11:44 [info]: Server running on port 4000
+2026-01-28 11:11:44 [info]: Environment: development
+2026-01-28 11:11:46 [info]: Database connected
+2026-01-28 11:11:46 [info]: Server running on port 4000
+2026-01-28 11:11:46 [info]: Environment: development
+2026-01-28 11:11:53 [info]: Database connected
+2026-01-28 11:11:53 [info]: Server running on port 4000
+2026-01-28 11:11:53 [info]: Environment: development
+2026-01-28 11:11:57 [info]: Database connected
+2026-01-28 11:11:57 [info]: Server running on port 4000
+2026-01-28 11:11:57 [info]: Environment: development
+2026-01-28 11:12:00 [info]: Database connected
+2026-01-28 11:12:00 [info]: Server running on port 4000
+2026-01-28 11:12:00 [info]: Environment: development
+2026-01-28 11:12:06 [info]: Database connected
+2026-01-28 11:12:06 [info]: Server running on port 4000
+2026-01-28 11:12:06 [info]: Environment: development
+2026-01-28 11:12:11 [info]: Database connected
+2026-01-28 11:12:11 [info]: Server running on port 4000
+2026-01-28 11:12:11 [info]: Environment: development
+2026-01-28 11:12:14 [info]: Database connected
+2026-01-28 11:12:14 [info]: Server running on port 4000
+2026-01-28 11:12:14 [info]: Environment: development
+2026-01-28 11:12:18 [info]: Database connected
+2026-01-28 11:12:18 [info]: Server running on port 4000
+2026-01-28 11:12:18 [info]: Environment: development
+2026-01-28 11:12:23 [info]: Database connected
+2026-01-28 11:12:23 [info]: Server running on port 4000
+2026-01-28 11:12:23 [info]: Environment: development
+2026-01-28 11:12:28 [info]: Database connected
+2026-01-28 11:12:28 [info]: Server running on port 4000
+2026-01-28 11:12:28 [info]: Environment: development
+2026-01-28 11:12:33 [info]: Database connected
+2026-01-28 11:12:33 [info]: Server running on port 4000
+2026-01-28 11:12:33 [info]: Environment: development
+2026-01-28 11:12:38 [info]: Database connected
+2026-01-28 11:12:38 [info]: Server running on port 4000
+2026-01-28 11:12:38 [info]: Environment: development
+2026-01-28 11:12:42 [info]: Database connected
+2026-01-28 11:12:42 [info]: Server running on port 4000
+2026-01-28 11:12:42 [info]: Environment: development
+2026-01-28 11:12:47 [info]: Database connected
+2026-01-28 11:12:47 [info]: Server running on port 4000
+2026-01-28 11:12:47 [info]: Environment: development
+2026-01-28 11:13:36 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-28 11:13:37 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:34:36\n\n  31   return;\n  32 }\n  33 \n→ 34 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-28T05:43:37.637Z"}}
+2026-01-28 11:13:37 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-28 11:13:47 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-28 11:13:47 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:34:36\n\n  31   return;\n  32 }\n  33 \n→ 34 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-28T05:43:47.700Z"}}
+2026-01-28 11:13:47 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-28 17:08:58 [error]: Prisma Error {"error":{"timestamp":"2026-01-28T11:38:58.060Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-29 17:10:59 [info]: Database connected
+2026-01-29 17:10:59 [info]: Server running on port 4000
+2026-01-29 17:10:59 [info]: Environment: development
+2026-01-29 17:12:39 [info]: Database connected
+2026-01-29 17:12:39 [info]: Server running on port 4000
+2026-01-29 17:12:39 [info]: Environment: development
+2026-01-29 17:13:07 [info]: Database connected
+2026-01-29 17:13:07 [info]: Server running on port 4000
+2026-01-29 17:13:07 [info]: Environment: development
+2026-01-29 17:13:57 [info]: Incoming request {"method":"GET","path":"/favicon.ico","ip":"::1"}
+2026-01-29 17:13:59 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:02 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:03 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:03 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:04 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:06 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:14:10 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:15:01 [info]: Database connected
+2026-01-29 17:16:13 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:16:31 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-29 17:16:32 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:38:36\n\n  35   return;\n  36 }\n  37 \n→ 38 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-29T11:46:32.261Z"}}
+2026-01-29 17:16:32 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-29 17:21:25 [info]: Database connected
+2026-01-29 17:21:25 [info]: Server running on port 4000
+2026-01-29 17:21:25 [info]: Environment: development
+2026-01-29 17:21:54 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 17:22:22 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-29 17:22:22 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:38:36\n\n  35   return;\n  36 }\n  37 \n→ 38 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-29T11:52:22.540Z"}}
+2026-01-29 17:22:22 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-29 19:17:06 [error]: Prisma Error {"error":{"timestamp":"2026-01-29T13:47:06.310Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-29 23:00:43 [info]: Database connected
+2026-01-29 23:00:43 [info]: Server running on port 4000
+2026-01-29 23:00:43 [info]: Environment: development
+2026-01-29 23:01:04 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 23:01:05 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 23:01:44 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-29 23:01:44 [error]: Prisma Error {"error":{"message":"\nInvalid `prisma.user.findUnique()` invocation in\nC:\\Users\\VANSH\\Desktop\\velo-crypto-platform\\backend\\src\\controllers\\auth.controller.ts:38:36\n\n  35   return;\n  36 }\n  37 \n→ 38 let user = await prisma.user.findUnique(\nThe table `public.users` does not exist in the current database.","target":"user.findUnique","timestamp":"2026-01-29T17:31:44.889Z"}}
+2026-01-29 23:01:44 [error]: Google auth error {"error":{"name":"PrismaClientKnownRequestError","code":"P2021","clientVersion":"5.22.0","meta":{"modelName":"User","table":"public.users"}}}
+2026-01-29 23:28:33 [info]: Database connected
+2026-01-29 23:28:33 [info]: Server running on port 4000
+2026-01-29 23:28:33 [info]: Environment: development
+2026-01-29 23:29:06 [info]: Incoming request {"method":"GET","path":"/","ip":"::1"}
+2026-01-29 23:29:53 [info]: Incoming request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-29 23:29:54 [info]: New user created via Google Auth {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","email":"vansh.sharma.cse@gmail.com"}
+2026-01-29 23:29:55 [info]: Wallet created for user {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","walletId":"b5f7c8ca-7052-42ea-9e90-8c3726f156f5","address":"0x626895aF7EC3d1e0C452Dd79fEaE1eAB6027fFC7"}
+2026-01-29 23:29:55 [info]: User logged in successfully {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","email":"vansh.sharma.cse@gmail.com"}
+2026-01-29 23:29:57 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:29:57 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:29:58 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:29:58 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:30:44 [info]: Incoming request {"method":"POST","path":"/api/transactions/add-money","ip":"::1"}
+2026-01-29 23:30:46 [error]: Transak on-ramp order failed {"error":{"error":{"statusCode":401,"name":"Unauthorized","message":"Authorization Required"}}}
+2026-01-29 23:30:46 [error]: On-ramp initiation failed {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","amount":10,"error":{"statusCode":500,"isOperational":true}}
+2026-01-29 23:30:46 [error]: Add money failed {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","error":{"statusCode":500,"isOperational":true}}
+2026-01-29 23:30:58 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:30:58 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:30:59 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:30:59 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:31:05 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:31:05 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:31:05 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:31:06 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:31:13 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:31:13 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:31:13 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:31:13 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:35:57 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:35:57 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-29 23:35:58 [info]: Incoming request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-29 23:35:58 [info]: Incoming request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-30 01:41:55 [error]: Prisma Error {"error":{"timestamp":"2026-01-29T20:11:55.176Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-30 01:41:56 [error]: Prisma Error {"error":{"timestamp":"2026-01-29T20:11:56.077Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-30 01:41:56 [error]: Prisma Error {"error":{"timestamp":"2026-01-29T20:11:56.080Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-30 10:35:02 [info]: Database connected
+2026-01-30 10:35:02 [info]: Server running on port 4000
+2026-01-30 10:35:02 [info]: Environment: development
+2026-01-30 10:35:07 [info]: Database connected
+2026-01-30 10:35:07 [info]: Server running on port 4000
+2026-01-30 10:35:07 [info]: Environment: development
+2026-01-30 10:35:13 [info]: Database connected
+2026-01-30 10:35:13 [info]: Server running on port 4000
+2026-01-30 10:35:13 [info]: Environment: development
+2026-01-30 10:36:14 [info]: Database connected
+2026-01-30 10:36:14 [info]: Server running on port 4000
+2026-01-30 10:36:14 [info]: Environment: development
+2026-01-30 10:36:18 [info]: Database connected
+2026-01-30 10:36:18 [info]: Server running on port 4000
+2026-01-30 10:36:18 [info]: Environment: development
+2026-01-30 10:36:23 [info]: Database connected
+2026-01-30 10:36:23 [info]: Server running on port 4000
+2026-01-30 10:36:23 [info]: Environment: development
+2026-01-30 10:36:26 [info]: Database connected
+2026-01-30 10:36:26 [info]: Server running on port 4000
+2026-01-30 10:36:26 [info]: Environment: development
+2026-01-30 10:36:34 [info]: Database connected
+2026-01-30 10:36:34 [info]: Server running on port 4000
+2026-01-30 10:36:34 [info]: Environment: development
+2026-01-30 10:38:17 [info]: Database connected
+2026-01-30 10:38:17 [info]: Server running on port 4000
+2026-01-30 10:38:17 [info]: Environment: development
+2026-01-30 10:40:39 [info]: Database connected
+2026-01-30 10:40:39 [info]: Server running on port 4000
+2026-01-30 10:40:39 [info]: Environment: development
+2026-01-30 10:40:45 [info]: Database connected
+2026-01-30 10:40:45 [info]: Server running on port 4000
+2026-01-30 10:40:45 [info]: Environment: development
+2026-01-30 10:40:49 [info]: Database connected
+2026-01-30 10:40:49 [info]: Server running on port 4000
+2026-01-30 10:40:49 [info]: Environment: development
+2026-01-30 10:40:55 [info]: Database connected
+2026-01-30 10:40:55 [info]: Server running on port 4000
+2026-01-30 10:40:55 [info]: Environment: development
+2026-01-30 17:23:22 [info]: Database connected
+2026-01-30 17:23:22 [info]: Server running on port 4000
+2026-01-30 17:23:22 [info]: Environment: development
+2026-01-30 19:23:21 [error]: Prisma Error {"error":{"timestamp":"2026-01-30T13:53:21.442Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-31 16:47:49 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 16:47:49 [warn]: Authentication failed {"error":"No token provided"}
+2026-01-31 16:47:49 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 16:47:49 [warn]: Authentication failed {"error":"No token provided"}
+2026-01-31 16:47:49 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 16:47:49 [warn]: Authentication failed {"error":"No token provided"}
+2026-01-31 16:47:49 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 16:47:49 [warn]: Authentication failed {"error":"No token provided"}
+2026-01-31 16:51:36 [info]: Request {"method":"POST","path":"/api/auth/google","ip":"::1"}
+2026-01-31 16:51:38 [info]: User logged in successfully {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","email":"vansh.sharma.cse@gmail.com"}
+2026-01-31 16:51:38 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 16:51:38 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 16:51:38 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 16:51:39 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 16:51:51 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 16:51:53 [error]: Transak session creation failed {"error":{"statusCode":400,"message":"referrerDomain is required","errorCode":9001}}
+2026-01-31 16:51:53 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 16:59:35 [info]: Database connected
+2026-01-31 16:59:35 [info]: Server running on port 4000
+2026-01-31 16:59:35 [info]: Environment: development
+2026-01-31 16:59:38 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 16:59:39 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 16:59:39 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 17:04:29 [info]: Database connected
+2026-01-31 17:04:29 [info]: Server running on port 4000
+2026-01-31 17:04:29 [info]: Environment: development
+2026-01-31 17:04:39 [info]: Database connected
+2026-01-31 17:04:39 [info]: Server running on port 4000
+2026-01-31 17:04:39 [info]: Environment: development
+2026-01-31 17:04:54 [info]: Database connected
+2026-01-31 17:04:54 [info]: Server running on port 4000
+2026-01-31 17:04:54 [info]: Environment: development
+2026-01-31 17:05:10 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 17:05:12 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 17:05:12 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 17:06:10 [info]: Database connected
+2026-01-31 17:06:10 [info]: Server running on port 4000
+2026-01-31 17:06:10 [info]: Environment: development
+2026-01-31 17:06:31 [info]: Database connected
+2026-01-31 17:06:31 [info]: Server running on port 4000
+2026-01-31 17:06:31 [info]: Environment: development
+2026-01-31 17:06:44 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 17:06:45 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 17:06:45 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 17:07:45 [info]: Database connected
+2026-01-31 17:07:45 [info]: Server running on port 4000
+2026-01-31 17:07:45 [info]: Environment: development
+2026-01-31 17:07:51 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 17:07:53 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 17:07:53 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 17:14:20 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:14:20 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:14:21 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:14:22 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:14:47 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:14:47 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:14:47 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:14:47 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:14:55 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:14:55 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:15:17 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:15:17 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:15:17 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:15:17 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:15:48 [info]: Request {"method":"POST","path":"/api/transactions/transfer","ip":"::1"}
+2026-01-31 17:15:49 [error]: Transfer failed {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","error":{"statusCode":400,"isOperational":true}}
+2026-01-31 17:15:54 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:15:54 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:15:54 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:15:54 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:16:00 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:16:00 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:16:01 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 17:16:01 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 17:17:47 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 17:17:48 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 17:17:48 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 17:20:26 [info]: Database connected
+2026-01-31 17:20:26 [info]: Server running on port 4000
+2026-01-31 17:20:26 [info]: Environment: development
+2026-01-31 22:55:09 [info]: Database connected
+2026-01-31 22:55:09 [info]: Server running on port 4000
+2026-01-31 22:55:09 [info]: Environment: development
+2026-01-31 22:55:40 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 22:55:40 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 22:55:40 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 22:55:41 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 22:55:48 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 22:55:50 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 22:55:50 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:07:03 [info]: SIGINT received, shutting down
+2026-01-31 23:08:22 [info]: Database connected
+2026-01-31 23:08:22 [info]: Server running on port 4000
+2026-01-31 23:08:22 [info]: Environment: development
+2026-01-31 23:08:42 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:08:42 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:08:43 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:08:43 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:08:50 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:08:51 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:08:51 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:09:17 [info]: Database connected
+2026-01-31 23:09:17 [info]: Server running on port 4000
+2026-01-31 23:09:17 [info]: Environment: development
+2026-01-31 23:09:23 [info]: Database connected
+2026-01-31 23:09:23 [info]: Server running on port 4000
+2026-01-31 23:09:23 [info]: Environment: development
+2026-01-31 23:09:26 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:09:26 [error]: Failed to generate Transak access token {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:09:26 [error]: Transak session creation failed {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:09:26 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:13:48 [info]: Database connected
+2026-01-31 23:13:48 [info]: Server running on port 4000
+2026-01-31 23:13:48 [info]: Environment: development
+2026-01-31 23:14:05 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:14:07 [error]: Failed to generate Transak access token {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:14:07 [error]: Transak session creation failed {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:14:07 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:18:33 [info]: Database connected
+2026-01-31 23:18:33 [info]: Server running on port 4000
+2026-01-31 23:18:33 [info]: Environment: development
+2026-01-31 23:18:46 [info]: Database connected
+2026-01-31 23:18:46 [info]: Server running on port 4000
+2026-01-31 23:18:46 [info]: Environment: development
+2026-01-31 23:18:55 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:18:56 [error]: Failed to generate Transak access token {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:18:56 [error]: Transak session creation failed {"error":{"statusCode":404,"message":"Not Found","errorCode":9001}}
+2026-01-31 23:18:56 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:52:26 [info]: Database connected
+2026-01-31 23:52:26 [info]: Server running on port 4000
+2026-01-31 23:52:26 [info]: Environment: development
+2026-01-31 23:52:33 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:52:35 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:52:35 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:52:53 [info]: Database connected
+2026-01-31 23:52:53 [info]: Server running on port 4000
+2026-01-31 23:52:53 [info]: Environment: development
+2026-01-31 23:53:00 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:53:00 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:53:01 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:53:02 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:53:14 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:53:15 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:53:15 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:55:37 [info]: Database connected
+2026-01-31 23:55:37 [info]: Server running on port 4000
+2026-01-31 23:55:37 [info]: Environment: development
+2026-01-31 23:55:40 [info]: Database connected
+2026-01-31 23:55:40 [info]: Server running on port 4000
+2026-01-31 23:55:40 [info]: Environment: development
+2026-01-31 23:55:43 [info]: Database connected
+2026-01-31 23:55:43 [info]: Server running on port 4000
+2026-01-31 23:55:43 [info]: Environment: development
+2026-01-31 23:56:05 [info]: Database connected
+2026-01-31 23:56:05 [info]: Server running on port 4000
+2026-01-31 23:56:05 [info]: Environment: development
+2026-01-31 23:56:30 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:56:30 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:56:31 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-01-31 23:56:32 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-01-31 23:56:43 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:56:45 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:56:45 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:57:01 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:57:02 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:57:02 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:59:19 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-01-31 23:59:21 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-01-31 23:59:21 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-01-31 23:59:38 [error]: Prisma Error {"error":{"timestamp":"2026-01-31T18:29:38.042Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-31 23:59:38 [error]: Prisma Error {"error":{"timestamp":"2026-01-31T18:29:38.190Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-01-31 23:59:38 [error]: Prisma Error {"error":{"timestamp":"2026-01-31T18:29:38.201Z","message":"Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: \"An existing connection was forcibly closed by the remote host.\" }) }","target":"quaint::connector::postgres::native"}}
+2026-02-01 00:02:37 [info]: Database connected
+2026-02-01 00:02:37 [info]: Server running on port 4000
+2026-02-01 00:02:37 [info]: Environment: development
+2026-02-01 00:02:41 [info]: Database connected
+2026-02-01 00:02:41 [info]: Server running on port 4000
+2026-02-01 00:02:41 [info]: Environment: development
+2026-02-01 00:02:52 [info]: Database connected
+2026-02-01 00:02:52 [info]: Server running on port 4000
+2026-02-01 00:02:52 [info]: Environment: development
+2026-02-01 00:02:58 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-02-01 00:03:00 [error]: Transak session creation failed {"error":{"statusCode":401,"message":"Invalid or missing access-token.","errorCode":1002}}
+2026-02-01 00:03:00 [error]: Create on-ramp widget failed {"error":{"statusCode":500,"isOperational":true},"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666"}
+2026-02-01 00:10:37 [info]: Database connected
+2026-02-01 00:10:37 [info]: Server running on port 4000
+2026-02-01 00:10:37 [info]: Environment: development
+2026-02-01 00:10:41 [info]: Database connected
+2026-02-01 00:10:41 [info]: Server running on port 4000
+2026-02-01 00:10:41 [info]: Environment: development
+2026-02-01 00:10:45 [info]: Database connected
+2026-02-01 00:10:45 [info]: Server running on port 4000
+2026-02-01 00:10:45 [info]: Environment: development
+2026-02-01 00:10:51 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-02-01 00:10:53 [info]: Transak access token refreshed
+2026-02-01 00:10:54 [info]: Transak widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJlNjJiMGQ1NjUyY2NlZDVjY2E3OTNjYTFmMzEzNjM5YiIsImlhdCI6MTc2OTg4NDg1MywiZXhwIjoxNzY5ODg1MTUzfQ.kjyM8x6G4LAIjQ4iygZ5vKWJ-2ZA2w7AUAGGR1fWOGYKALmfYZbUUTXlF5ffDj8HFwLkwWXYSFo5ULYp0hOBAA"}
+2026-02-01 00:10:55 [info]: On-ramp widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","amount":1000,"currency":"GBP","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJlNjJiMGQ1NjUyY2NlZDVjY2E3OTNjYTFmMzEzNjM5YiIsImlhdCI6MTc2OTg4NDg1MywiZXhwIjoxNzY5ODg1MTUzfQ.kjyM8x6G4LAIjQ4iygZ5vKWJ-2ZA2w7AUAGGR1fWOGYKALmfYZbUUTXlF5ffDj8HFwLkwWXYSFo5ULYp0hOBAA"}
+2026-02-01 00:54:53 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:54:53 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-02-01 00:54:54 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-02-01 00:54:54 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:55:06 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-02-01 00:55:07 [info]: Transak access token refreshed
+2026-02-01 00:55:08 [info]: Transak widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJiMWU1N2Y5NzM3NmFmYmMxZGEzNGM2NjY3NDIxMjUyNiIsImlhdCI6MTc2OTg4NzUwNywiZXhwIjoxNzY5ODg3ODA3fQ.TGUW7hoySOzkvpKp_P6VBXqOE24r80cDk47BdZQtAx1M_TPpjvfvLq2HJZx2JGVPB_OCwna4vxsxbOlZjzizAA"}
+2026-02-01 00:55:08 [info]: On-ramp widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","amount":1000,"currency":"USD","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJiMWU1N2Y5NzM3NmFmYmMxZGEzNGM2NjY3NDIxMjUyNiIsImlhdCI6MTc2OTg4NzUwNywiZXhwIjoxNzY5ODg3ODA3fQ.TGUW7hoySOzkvpKp_P6VBXqOE24r80cDk47BdZQtAx1M_TPpjvfvLq2HJZx2JGVPB_OCwna4vxsxbOlZjzizAA"}
+2026-02-01 00:57:49 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:57:49 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-02-01 00:57:50 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-02-01 00:57:50 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:57:55 [info]: Request {"method":"POST","path":"/api/transak/on-ramp/widget","ip":"::1"}
+2026-02-01 00:57:57 [info]: Transak widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJmNjRkOGU0NTRiMzdjMzIzMmYyMzY0YzQ3ZTI4MTVkNyIsImlhdCI6MTc2OTg4NzY3NiwiZXhwIjoxNzY5ODg3OTc2fQ.GGLJAp-hyFgOib5dVmiAin9VaqaJXc2rhkJ-6Kfiy8T2JBa5z0kpg-k2tdFDykLmh_FTqg7M-0LR4B7heLmUCw"}
+2026-02-01 00:57:57 [info]: On-ramp widget created {"userId":"ba17a4dd-b39f-4361-aa0c-4c87d2f51666","amount":1000,"currency":"USD","sessionId":"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJvdHQiOiJmNjRkOGU0NTRiMzdjMzIzMmYyMzY0YzQ3ZTI4MTVkNyIsImlhdCI6MTc2OTg4NzY3NiwiZXhwIjoxNzY5ODg3OTc2fQ.GGLJAp-hyFgOib5dVmiAin9VaqaJXc2rhkJ-6Kfiy8T2JBa5z0kpg-k2tdFDykLmh_FTqg7M-0LR4B7heLmUCw"}
+2026-02-01 00:59:18 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:59:18 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
+2026-02-01 00:59:19 [info]: Request {"method":"GET","path":"/api/auth/me","ip":"::1"}
+2026-02-01 00:59:19 [info]: Request {"method":"GET","path":"/api/transactions","ip":"::1"}
