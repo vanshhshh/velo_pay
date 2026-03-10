@@ -16,9 +16,29 @@ import webhookRoutes from './routes/webhook.routes';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const rawCorsOrigins = process.env.CORS_ORIGIN || '';
+const configuredOrigins = rawCorsOrigins
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins =
+  configuredOrigins.length > 0 ? configuredOrigins : ['http://localhost:3000'];
+
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked origin: ${origin}`));
+  },
   credentials: true
 }));
 
