@@ -104,7 +104,7 @@ if (user && !user.googleId) {
           email: user!.email,
           name: user!.name,
           balance: parseFloat(user!.wallet?.balance.toString() || '0'),
-          currency: ''
+          currency: user!.currency
         },
         token: jwtToken
       };
@@ -138,6 +138,7 @@ if (user && !user.googleId) {
         email: user.email,
         name: user.name,
         balance: parseFloat(user.wallet?.balance.toString() || '0'),
+        currency: user.currency,
         createdAt: user.createdAt
       });
     } catch (error) {

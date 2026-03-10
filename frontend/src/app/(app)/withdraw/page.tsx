@@ -1,11 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
 import { CURRENCIES } from '@/lib/constants'
 import { TransakWidget } from '@/components/transak/TransakWidget'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+
+type WalletRedirectionInfo = {
+  orderId?: string
+  walletAddress?: string
+  network?: string
+  cryptoCurrency?: string
+  cryptoAmount?: string
+  fiatCurrency?: string
+  fiatAmount?: string
+}
+
+function readField(
+  source: Record<string, unknown>,
+  keys: string[]
+): string | undefined {
+  for (const key of keys) {
+    const value = source[key]
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value
+    }
+    if (typeof value === 'number') {
+      return value.toString()
+    }
+  }
+  return undefined
+}
+
+function extractWalletRedirectionInfo(
+  payload: Record<string, unknown>
+): WalletRedirectionInfo {
+  const data =
+    payload.data && typeof payload.data === 'object'
+      ? (payload.data as Record<string, unknown>)
+      : payload
+
+  return {
+    orderId: readField(data, ['id', 'orderId', 'order_id']),
+    walletAddress: readField(data, [
+      'walletAddress',
+      'depositWalletAddress',
+      'address',
+    ]),
+    network: readField(data, ['network', 'networkName']),
+    cryptoCurrency: readField(data, [
+      'cryptoCurrencyCode',
+      'cryptoCurrency',
+      'cryptocurrency',
+    ]),
+    cryptoAmount: readField(data, [
+      'cryptoAmount',
+      'cryptoAmountDue',
+      'requestedCryptoAmount',
+    ]),
+    fiatCurrency: readField(data, ['fiatCurrency', 'fiatCurrencyCode']),
+    fiatAmount: readField(data, ['fiatAmount', 'requestedFiatAmount']),
+  }
+}
 
 export default function WithdrawPage() {
   const router = useRouter()
@@ -17,6 +74,33 @@ export default function WithdrawPage() {
   const [routingNumber, setRoutingNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [widgetUrl, setWidgetUrl] = useState('')
+  const [walletRedirectionInfo, setWalletRedirectionInfo] =
+    useState<WalletRedirectionInfo | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const params = new URLSearchParams(window.location.search)
+    const queryInfo = extractWalletRedirectionInfo(
+      Object.fromEntries(params.entries())
+    )
+
+    const hasData = Object.values(queryInfo).some(Boolean)
+    if (!hasData) return
+
+    setWalletRedirectionInfo(queryInfo)
+
+    if (!amount && queryInfo.fiatAmount) {
+      setAmount(queryInfo.fiatAmount)
+    }
+
+    if (
+      queryInfo.fiatCurrency &&
+      CURRENCIES.some((item) => item.code === queryInfo.fiatCurrency)
+    ) {
+      setCurrency(queryInfo.fiatCurrency)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +135,21 @@ export default function WithdrawPage() {
   const handleSuccess = () => {
     setWidgetUrl('')
     router.push('/dashboard')
+  }
+
+  const handleWalletRedirection = (payload: Record<string, unknown>) => {
+    const info = extractWalletRedirectionInfo(payload)
+    setWalletRedirectionInfo(info)
+
+    if (!amount && info.fiatAmount) {
+      setAmount(info.fiatAmount)
+    }
+
+    if (info.fiatCurrency && CURRENCIES.some((item) => item.code === info.fiatCurrency)) {
+      setCurrency(info.fiatCurrency)
+    }
+
+    setWidgetUrl('')
   }
 
   return (
@@ -178,6 +277,39 @@ export default function WithdrawPage() {
               </p>
             </div>
 
+            {walletRedirectionInfo && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-semibold text-blue-900">
+                  Complete Crypto Transfer
+                </p>
+                <p className="text-sm text-blue-800">
+                  Use your wallet to send the required crypto to continue this withdrawal.
+                </p>
+                {walletRedirectionInfo.walletAddress && (
+                  <p className="text-sm text-blue-900 break-all">
+                    <strong>Wallet:</strong> {walletRedirectionInfo.walletAddress}
+                  </p>
+                )}
+                {(walletRedirectionInfo.cryptoAmount || walletRedirectionInfo.cryptoCurrency) && (
+                  <p className="text-sm text-blue-900">
+                    <strong>Amount:</strong>{' '}
+                    {walletRedirectionInfo.cryptoAmount || 'N/A'}{' '}
+                    {walletRedirectionInfo.cryptoCurrency || ''}
+                  </p>
+                )}
+                {walletRedirectionInfo.network && (
+                  <p className="text-sm text-blue-900">
+                    <strong>Network:</strong> {walletRedirectionInfo.network}
+                  </p>
+                )}
+                {walletRedirectionInfo.orderId && (
+                  <p className="text-sm text-blue-900 break-all">
+                    <strong>Order ID:</strong> {walletRedirectionInfo.orderId}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-4">
               <button
                 type="button"
@@ -202,6 +334,7 @@ export default function WithdrawPage() {
             widgetUrl={widgetUrl}
             onClose={handleClose}
             onSuccess={handleSuccess}
+            onWalletRedirection={handleWalletRedirection}
           />
         )}
       </div>

@@ -1,9 +1,13 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { WebhookController } from '../controllers/webhook.controller';
 
 const router = Router();
 const webhookController = new WebhookController();
 
-router.post('/transak', webhookController.handleTransakWebhook.bind(webhookController));
+router.post(
+  '/transak',
+  express.raw({ type: 'application/json' }),
+  webhookController.handleTransakWebhook.bind(webhookController)
+);
 
 export default router;

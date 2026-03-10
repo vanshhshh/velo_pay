@@ -9,8 +9,13 @@ const transakService = new TransakService();
 export class WebhookController {
   async handleTransakWebhook(req: Request, res: Response): Promise<void> {
     try {
-      const signature = req.headers['x-transak-signature'] as string;
-      const payload = JSON.stringify(req.body);
+      const signatureHeader = req.headers['x-transak-signature'];
+      const signature = Array.isArray(signatureHeader)
+        ? signatureHeader[0]
+        : signatureHeader;
+      const payload = Buffer.isBuffer(req.body)
+        ? req.body.toString('utf8')
+        : JSON.stringify(req.body);
 
       if (!signature || !transakService.verifyWebhook(payload, signature)) {
         logger.warn('Invalid webhook signature', {
@@ -21,7 +26,21 @@ export class WebhookController {
         return;
       }
 
-      const { eventName, webhookData } = req.body;
+      let parsedPayload: any
+      try {
+        parsedPayload = Buffer.isBuffer(req.body)
+          ? JSON.parse(payload)
+          : req.body
+      } catch {
+        res.status(400).json({ error: 'Malformed webhook payload' })
+        return
+      }
+      const { eventName, webhookData } = parsedPayload;
+
+      if (!eventName || !webhookData) {
+        res.status(400).json({ error: 'Invalid webhook payload' });
+        return;
+      }
 
       logger.info('Transak webhook received', {
         eventName,

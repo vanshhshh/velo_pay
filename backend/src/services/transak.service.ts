@@ -6,8 +6,16 @@ import { getTransakAccessToken } from './transak.auth'
 
 const TRANSAK_API_URL = 'https://api-gateway-stg.transak.com'
 const TRANSAK_API_KEY = process.env.TRANSAK_API_KEY!
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000'
 const TRANSAK_WEBHOOK_SECRET = process.env.TRANSAK_WEBHOOK_SECRET!
+const DEFAULT_FRONTEND_URL = 'http://localhost:3000'
+
+function normalizeFrontendUrl(url?: string): string {
+  if (!url) return DEFAULT_FRONTEND_URL
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `https://${url}`
+}
+
+const FRONTEND_URL = normalizeFrontendUrl(process.env.FRONTEND_URL)
 
 export class TransakService {
   async createWidgetSession(
@@ -16,7 +24,13 @@ export class TransakService {
   ): Promise<{ widgetUrl: string; sessionId: string }> {
     try {
       const accessToken = await getTransakAccessToken()
-      const referrerDomain = new URL(FRONTEND_URL).hostname
+      const frontendBaseUrl = new URL(FRONTEND_URL)
+      const referrerDomain = frontendBaseUrl.hostname
+      const defaultRedirectPath =
+        request.productsAvailed === 'SELL' ? '/withdraw' : '/dashboard'
+      const redirectURL = request.redirectURL
+        ? new URL(request.redirectURL, frontendBaseUrl).toString()
+        : new URL(defaultRedirectPath, frontendBaseUrl).toString()
 
       const response = await axios.post(
         `${TRANSAK_API_URL}/api/v2/auth/session`,
@@ -30,8 +44,9 @@ export class TransakService {
             cryptoCurrencyCode: request.cryptoCurrency || 'USDC',
             walletAddress: request.walletAddress,
             disableWalletAddressForm: true,
-            network: 'ethereum',
-            redirectURL: `${FRONTEND_URL}/dashboard`,
+            network: request.network || 'ethereum',
+            walletRedirection: request.walletRedirection ?? false,
+            redirectURL,
           },
           landingPage: 'HOME',
         },

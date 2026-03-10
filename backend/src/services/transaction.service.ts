@@ -78,7 +78,9 @@ export class TransactionService {
         productsAvailed: 'BUY',
         fiatCurrency: currency,
         fiatAmount: amount,
-        walletAddress: wallet.address
+        walletAddress: wallet.address,
+        network: 'ethereum',
+        redirectURL: '/dashboard'
       })
 
     const transaction = await prisma.transaction.create({
@@ -125,7 +127,10 @@ export class TransactionService {
         productsAvailed: 'SELL',
         fiatCurrency: currency,
         fiatAmount: amount,
-        walletAddress: wallet.address
+        walletAddress: wallet.address,
+        network: 'ethereum',
+        walletRedirection: true,
+        redirectURL: '/withdraw'
       })
 
     const transaction = await prisma.transaction.create({
@@ -244,18 +249,36 @@ export class TransactionService {
       return
     }
 
+    if (event === 'ORDER_COMPLETED' && transaction.status === 'COMPLETED') {
+      logger.info('Duplicate ORDER_COMPLETED webhook ignored', {
+        transactionId: transaction.id,
+        sessionId,
+        orderId
+      })
+      return
+    }
+
+    if (event === 'ORDER_FAILED' && transaction.status === 'FAILED') {
+      logger.info('Duplicate ORDER_FAILED webhook ignored', {
+        transactionId: transaction.id,
+        sessionId,
+        orderId
+      })
+      return
+    }
+
+    if (event === 'ORDER_FAILED' && transaction.status === 'COMPLETED') {
+      logger.warn('ORDER_FAILED received for completed transaction, ignoring', {
+        transactionId: transaction.id,
+        sessionId,
+        orderId
+      })
+      return
+    }
+
     if (event === 'ORDER_COMPLETED') {
       await prisma.$transaction(async (tx) => {
-        await tx.transaction.update({
-          where: { id: transaction.id },
-          data: {
-            status: 'COMPLETED',
-            transakOrderId: orderId,
-            completedAt: new Date()
-          }
-        })
-
-        if (transaction.receiverWalletId) {
+        if (transaction.type === 'ONRAMP' && transaction.receiverWalletId) {
           const wallet = await tx.wallet.findUnique({
             where: { id: transaction.receiverWalletId }
           })
@@ -270,14 +293,58 @@ export class TransactionService {
             })
           }
         }
+
+        if (transaction.type === 'OFFRAMP' && transaction.senderWalletId) {
+          const wallet = await tx.wallet.findUnique({
+            where: { id: transaction.senderWalletId }
+          })
+
+          if (!wallet) {
+            throw new AppError(404, 'Sender wallet not found')
+          }
+
+          if (Number(wallet.balance) < Number(transaction.amount)) {
+            throw new AppError(400, 'Insufficient balance for off-ramp settlement')
+          }
+
+          await tx.wallet.update({
+            where: { id: wallet.id },
+            data: {
+              balance: Number(wallet.balance) - Number(transaction.amount)
+            }
+          })
+        }
+
+        await tx.transaction.update({
+          where: { id: transaction.id },
+          data: {
+            status: 'COMPLETED',
+            transakOrderId: orderId,
+            completedAt: new Date(),
+            failureReason: null
+          }
+        })
       })
+
+      return
     }
 
     if (event === 'ORDER_FAILED') {
       await prisma.transaction.update({
         where: { id: transaction.id },
-        data: { status: 'FAILED' }
+        data: {
+          status: 'FAILED',
+          failureReason: payload?.statusReason || payload?.message || 'Order failed'
+        }
       })
+
+      return
     }
+
+    logger.info('Unhandled Transak webhook event', {
+      transactionId: transaction.id,
+      sessionId,
+      event
+    })
   }
 }

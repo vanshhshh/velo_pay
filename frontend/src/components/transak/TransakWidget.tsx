@@ -1,13 +1,100 @@
 'use client'
 
+import { useEffect } from 'react'
 import { X } from 'lucide-react'
+
+type TransakWidgetEventPayload = Record<string, unknown>
 
 interface TransakWidgetProps {
   widgetUrl: string
   onClose: () => void
+  onSuccess?: () => void
+  onWalletRedirection?: (payload: TransakWidgetEventPayload) => void
 }
 
-export function TransakWidget({ widgetUrl, onClose }: TransakWidgetProps) {
+function parseMessageData(data: unknown): unknown {
+  if (typeof data !== 'string') return data
+
+  try {
+    return JSON.parse(data)
+  } catch {
+    return data
+  }
+}
+
+function extractTransakEvent(
+  data: unknown
+): { eventName: string; payload: TransakWidgetEventPayload } | null {
+  const parsed = parseMessageData(data)
+
+  if (!parsed || typeof parsed !== 'object') {
+    return null
+  }
+
+  const message = parsed as Record<string, unknown>
+  const directEvent =
+    message.eventName ?? message.event_id ?? message.eventId
+
+  if (typeof directEvent === 'string') {
+    const payload =
+      message.data && typeof message.data === 'object'
+        ? (message.data as TransakWidgetEventPayload)
+        : message
+
+    if (
+      directEvent === 'TRANSAK_WIDGET_EVENT' &&
+      payload &&
+      typeof payload === 'object'
+    ) {
+      const nestedEvent =
+        payload.eventName ?? payload.event_id ?? payload.eventId
+      if (typeof nestedEvent === 'string') {
+        const nestedPayload =
+          payload.data && typeof payload.data === 'object'
+            ? (payload.data as TransakWidgetEventPayload)
+            : payload
+        return { eventName: nestedEvent, payload: nestedPayload }
+      }
+    }
+
+    return { eventName: directEvent, payload }
+  }
+
+  return null
+}
+
+export function TransakWidget({
+  widgetUrl,
+  onClose,
+  onSuccess,
+  onWalletRedirection,
+}: TransakWidgetProps) {
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.origin.includes('transak')) return
+
+      const transakEvent = extractTransakEvent(event.data)
+      if (!transakEvent) return
+
+      const { eventName, payload } = transakEvent
+
+      if (eventName === 'WALLET_REDIRECTION') {
+        onWalletRedirection?.(payload)
+        return
+      }
+
+      if (
+        eventName === 'TRANSAK_ORDER_SUCCESSFUL' ||
+        eventName === 'ORDER_COMPLETED'
+      ) {
+        onSuccess?.()
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [onSuccess, onWalletRedirection])
+
   if (!widgetUrl) return null
 
   return (

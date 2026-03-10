@@ -41,6 +41,8 @@ export class TransakController {
       fiatAmount: amount,
       cryptoCurrency: 'USDC',
       walletAddress: wallet.address,
+      network: 'ethereum',
+      redirectURL: '/dashboard',
     }
   )
 
@@ -111,7 +113,10 @@ export class TransakController {
       fiatCurrency: currency,
       fiatAmount: amount,
       cryptoCurrency: 'USDC',
-      walletAddress: wallet.address
+      walletAddress: wallet.address,
+      network: 'ethereum',
+      walletRedirection: true,
+      redirectURL: '/withdraw',
     }
   );
 

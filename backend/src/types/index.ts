@@ -41,6 +41,9 @@ export interface TransakWidgetRequest {
   fiatAmount?: number;
   cryptoCurrency?: string;
   walletAddress?: string;
+  network?: string;
+  walletRedirection?: boolean;
+  redirectURL?: string;
 }
 
 export interface TransakWidgetResponse {

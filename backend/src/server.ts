@@ -21,8 +21,6 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -43,10 +41,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Webhooks must be mounted before JSON body parsing so signatures can be verified.
+app.use('/api/webhooks', webhookRoutes);
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/transak', transakRoutes); // NEW
-app.use('/api/webhooks', webhookRoutes);
 
 app.get('/', (req, res) => {
   res.json({
