@@ -1,31 +1,55 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
 import { CURRENCIES } from '@/lib/constants'
+import { formatCurrency } from '@/lib/format'
 import { TransakWidget } from '@/components/transak/TransakWidget'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, CreditCard, LockKeyhole, Plus } from 'lucide-react'
+
+type TransakPayload = Record<string, unknown>
+
+function readString(source: TransakPayload, keys: string[]) {
+  for (const key of keys) {
+    const value = source[key]
+    if (typeof value === 'string' && value.trim()) return value
+    if (typeof value === 'number') return value.toString()
+  }
+  return undefined
+}
 
 export default function AddMoneyPage() {
   const router = useRouter()
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState('100')
   const [currency, setCurrency] = useState('USD')
   const [loading, setLoading] = useState(false)
+  const [settling, setSettling] = useState(false)
   const [widgetUrl, setWidgetUrl] = useState('')
+  const [sessionId, setSessionId] = useState('')
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const numericAmount = Number(amount)
+  const selectedCurrency = useMemo(
+    () => CURRENCIES.find((item) => item.code === currency),
+    [currency]
+  )
+  const isValidAmount = Number.isFinite(numericAmount) && numericAmount >= 10
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
     setLoading(true)
+    setError('')
 
     try {
       const response = await apiClient.createOnRampWidget({
-        amount: parseFloat(amount),
-        currency
+        amount: numericAmount,
+        currency,
       })
       setWidgetUrl(response.data.widgetUrl)
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to initiate payment')
+      setSessionId(response.data.sessionId)
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to initiate payment')
     } finally {
       setLoading(false)
     }
@@ -33,93 +57,179 @@ export default function AddMoneyPage() {
 
   const handleClose = () => {
     setWidgetUrl('')
-    router.push('/dashboard')
   }
 
-  const handleSuccess = () => {
-    setWidgetUrl('')
-    router.push('/dashboard')
+  const handleSuccess = async (payload: TransakPayload) => {
+    const data =
+      payload.data && typeof payload.data === 'object'
+        ? (payload.data as TransakPayload)
+        : payload
+    const orderId = readString(data, ['id', 'orderId', 'order_id'])
+
+    if (!sessionId) {
+      setWidgetUrl('')
+      router.push('/dashboard')
+      return
+    }
+
+    setSettling(true)
+    setError('')
+
+    try {
+      await apiClient.completeOnRampWidget({ sessionId, orderId })
+      setWidgetUrl('')
+      router.push('/dashboard')
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          'Payment finished, but the balance could not be updated yet.'
+      )
+      setWidgetUrl('')
+    } finally {
+      setSettling(false)
+    }
   }
 
   return (
-    <div className="py-8">
-      <div className="container-custom max-w-2xl">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition"
-        >
-          <ArrowLeft size={20} className="mr-2" />
-          Back to Dashboard
-        </button>
+    <div className="mx-auto max-w-6xl">
+      <button
+        onClick={() => router.push('/dashboard')}
+        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-950"
+      >
+        <ArrowLeft size={18} />
+        Back to dashboard
+      </button>
 
-        <div className="card">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Add Money</h1>
-          <p className="text-gray-600 mb-8">Load your account with funds to start sending</p>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Currency
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="input-field"
-              >
-                {CURRENCIES.map((curr) => (
-                  <option key={curr.code} value={curr.code}>
-                    {curr.flag} {curr.name} ({curr.symbol})
-                  </option>
-                ))}
-              </select>
+      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+        <section className="surface p-6 sm:p-8">
+          <div className="mb-8 flex items-start gap-4">
+            <div className="icon-tile text-teal-600">
+              <Plus size={22} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
-                  {CURRENCIES.find(c => c.code === currency)?.symbol}
-                </span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="10"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="input-field pl-10 text-lg"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-              <p className="text-sm text-gray-500 mt-2">Minimum: {CURRENCIES.find(c => c.code === currency)?.symbol}10</p>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900">
-                <strong>Secure Payment:</strong> You'll be redirected to our payment processor to complete your transaction securely.
+              <h1 className="text-2xl font-semibold text-slate-950">
+                Add money
+              </h1>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Choose the amount, complete the Transak checkout, and Velo will
+                credit the designated pending on-ramp amount automatically.
               </p>
             </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Currency
+                </label>
+                <select
+                  value={currency}
+                  onChange={(event) => setCurrency(event.target.value)}
+                  className="input-field"
+                >
+                  {CURRENCIES.map((curr) => (
+                    <option key={curr.code} value={curr.code}>
+                      {curr.flag} - {curr.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Amount
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">
+                    {selectedCurrency?.symbol}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="10"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    className="input-field pl-14 text-lg font-semibold"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+                <p className="mt-2 text-sm text-slate-500">Minimum amount is 10.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[50, 100, 250].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setAmount(value.toString())}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-teal-300 hover:bg-teal-50"
+                >
+                  {formatCurrency(value, currency)}
+                </button>
+              ))}
+            </div>
+
+            {error && (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
-              disabled={loading || !amount}
-              className="btn-primary w-full text-lg"
+              disabled={loading || settling || !isValidAmount}
+              className="btn-primary w-full"
             >
-              {loading ? 'Processing...' : 'Continue to Payment'}
+              <CreditCard size={18} />
+              {loading ? 'Opening checkout...' : 'Continue to secure checkout'}
             </button>
           </form>
-        </div>
+        </section>
 
-        {widgetUrl && (
-          <TransakWidget
-            widgetUrl={widgetUrl}
-            onClose={handleClose}
-            onSuccess={handleSuccess}
-          />
-        )}
+        <aside className="space-y-4">
+          <div className="surface p-5">
+            <p className="text-sm font-semibold text-slate-500">You are adding</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-950">
+              {formatCurrency(isValidAmount ? numericAmount : 0, currency)}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              This exact amount is saved as a pending on-ramp before the widget opens.
+            </p>
+          </div>
+          <div className="surface p-5">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-950">
+              <LockKeyhole size={18} className="text-teal-600" />
+              Settlement flow
+            </div>
+            <div className="space-y-3 text-sm text-slate-600">
+              <p>1. Create a pending Velo transaction.</p>
+              <p>2. Complete the Transak checkout.</p>
+              <p>3. Credit the saved pending amount once completion is received.</p>
+            </div>
+          </div>
+          <div className="surface p-5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <BadgeCheck size={18} />
+              Idempotent crediting
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Duplicate completion events keep the balance unchanged after the
+              first successful settlement.
+            </p>
+          </div>
+        </aside>
       </div>
+
+      {widgetUrl && (
+        <TransakWidget
+          widgetUrl={widgetUrl}
+          onClose={handleClose}
+          onSuccess={handleSuccess}
+        />
+      )}
     </div>
   )
 }

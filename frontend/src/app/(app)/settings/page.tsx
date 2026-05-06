@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import { CURRENCIES } from '@/lib/constants'
-import { User, Bell, Shield, CreditCard } from 'lucide-react'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { Bell, CreditCard, Shield, User } from 'lucide-react'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
@@ -11,146 +12,123 @@ export default function SettingsPage() {
   const [selectedCurrency, setSelectedCurrency] = useState('USD')
 
   useEffect(() => {
+    async function loadUser() {
+      try {
+        const response = await apiClient.getCurrentUser()
+        setUser(response.data)
+        setSelectedCurrency(response.data.currency || 'USD')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     loadUser()
   }, [])
 
-  const loadUser = async () => {
-    try {
-      const response = await apiClient.getCurrentUser()
-      setUser(response.data)
-      setSelectedCurrency(response.data.currency || 'USD')
-    } catch (error) {
-      console.error('Failed to load user:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-teal-500" />
       </div>
     )
   }
 
+  const sections = [
+    {
+      title: 'Security',
+      icon: Shield,
+      rows: [
+        ['Two-factor authentication', 'Add another check before sensitive actions.', 'Enable'],
+        ['Account sessions', 'Review active sessions and sign out old devices.', 'Review'],
+      ],
+    },
+    {
+      title: 'Notifications',
+      icon: Bell,
+      rows: [
+        ['Email notifications', 'Receive settlement and transaction updates.', 'On'],
+        ['Transaction alerts', 'Notify me for every account movement.', 'On'],
+      ],
+    },
+  ]
+
   return (
-    <div className="py-8">
-      <div className="container-custom max-w-4xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        title="Settings"
+        description="Manage account identity, currency preferences, and security defaults."
+      />
 
-        {/* Profile */}
-        <div className="card mb-6">
-          <div className="flex items-center mb-6">
-            <User className="text-primary-600 mr-3" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-              <input
-                type="text"
-                value={user?.name || ''}
-                className="input-field"
-                disabled
-              />
+      <div className="grid gap-6">
+        <section className="surface p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="icon-tile text-teal-600">
+              <User size={20} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                value={user?.email || ''}
-                className="input-field"
-                disabled
-              />
+              <h2 className="font-semibold text-slate-950">Profile</h2>
+              <p className="text-sm text-slate-500">Identity synced from Google.</p>
             </div>
           </div>
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Name</label>
+              <input type="text" value={user?.name || ''} className="input-field" disabled />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+              <input type="email" value={user?.email || ''} className="input-field" disabled />
+            </div>
+          </div>
+        </section>
 
-        {/* Preferences */}
-        <div className="card mb-6">
-          <div className="flex items-center mb-6">
-            <CreditCard className="text-primary-600 mr-3" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">Preferences</h2>
+        <section className="surface p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="icon-tile text-blue-600">
+              <CreditCard size={20} />
+            </div>
+            <div>
+              <h2 className="font-semibold text-slate-950">Preferences</h2>
+              <p className="text-sm text-slate-500">Used as the default display currency.</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Default Currency
-            </label>
-            <select
-              value={selectedCurrency}
-              onChange={(e) => setSelectedCurrency(e.target.value)}
-              className="input-field"
-            >
-              {CURRENCIES.map((curr) => (
-                <option key={curr.code} value={curr.code}>
-                  {curr.flag} {curr.name} ({curr.symbol})
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-gray-500 mt-2">
-              This will be your default currency for transactions
-            </p>
-          </div>
-        </div>
+          <select
+            value={selectedCurrency}
+            onChange={(event) => setSelectedCurrency(event.target.value)}
+            className="input-field max-w-md"
+          >
+            {CURRENCIES.map((curr) => (
+              <option key={curr.code} value={curr.code}>
+                {curr.flag} - {curr.name}
+              </option>
+            ))}
+          </select>
+        </section>
 
-        {/* Security */}
-        <div className="card mb-6">
-          <div className="flex items-center mb-6">
-            <Shield className="text-primary-600 mr-3" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">Security</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Two-Factor Authentication</p>
-                <p className="text-sm text-gray-600">Add an extra layer of security</p>
+        {sections.map((section) => {
+          const Icon = section.icon
+          return (
+            <section key={section.title} className="surface p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="icon-tile">
+                  <Icon size={20} />
+                </div>
+                <h2 className="font-semibold text-slate-950">{section.title}</h2>
               </div>
-              <button className="btn-secondary">
-                Enable
-              </button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Change Password</p>
-                <p className="text-sm text-gray-600">Update your account password</p>
+              <div className="divide-y divide-slate-100">
+                {section.rows.map(([title, description, action]) => (
+                  <div key={title} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium text-slate-950">{title}</p>
+                      <p className="text-sm text-slate-500">{description}</p>
+                    </div>
+                    <button className="btn-secondary">{action}</button>
+                  </div>
+                ))}
               </div>
-              <button className="btn-secondary">
-                Change
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Notifications */}
-        <div className="card">
-          <div className="flex items-center mb-6">
-            <Bell className="text-primary-600 mr-3" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Email Notifications</p>
-                <p className="text-sm text-gray-600">Receive transaction updates via email</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Transaction Alerts</p>
-                <p className="text-sm text-gray-600">Get notified of all account activity</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-              </label>
-            </div>
-          </div>
-        </div>
+            </section>
+          )
+        })}
       </div>
     </div>
   )

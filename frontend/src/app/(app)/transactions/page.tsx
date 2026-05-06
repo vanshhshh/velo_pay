@@ -1,197 +1,162 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
-import { CURRENCIES } from '@/lib/constants'
-import { ArrowUpRight, ArrowDownLeft, Search, Filter } from 'lucide-react'
+import { formatCurrency, formatDate, transactionSign, transactionTitle } from '@/lib/format'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ArrowDownLeft, ArrowUpRight, Filter, Search } from 'lucide-react'
 
 interface Transaction {
-  id: string;
-  type: 'ONRAMP' | 'OFFRAMP' | 'INTERNAL';
-  status: 'PENDING' | 'COMPLETED' | 'FAILED';
-  amount: number;
-  currency: string;
-  senderUser?: { name: string; email: string };
-  receiverUser?: { name: string; email: string };
-  createdAt: string;
+  id: string
+  type: 'ONRAMP' | 'OFFRAMP' | 'INTERNAL'
+  status: 'PENDING' | 'COMPLETED' | 'FAILED'
+  amount: number
+  currency: string
+  senderUser?: { name: string; email: string }
+  receiverUser?: { name: string; email: string }
+  createdAt: string
 }
+
+const filters = [
+  { label: 'All', value: 'ALL' },
+  { label: 'Added', value: 'ONRAMP' },
+  { label: 'Withdrawn', value: 'OFFRAMP' },
+  { label: 'Sent', value: 'INTERNAL' },
+] as const
 
 export default function TransactionsPage() {
   const router = useRouter()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'ALL' | 'ONRAMP' | 'OFFRAMP' | 'INTERNAL'>('ALL')
+  const [filter, setFilter] = useState<(typeof filters)[number]['value']>('ALL')
 
   useEffect(() => {
+    async function loadTransactions() {
+      try {
+        const response = await apiClient.getTransactions(1, 100)
+        setTransactions(response.data.data)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     loadTransactions()
   }, [])
 
-  const loadTransactions = async () => {
-    try {
-      const response = await apiClient.getTransactions(1, 100)
-      setTransactions(response.data.data)
-    } catch (error) {
-      console.error('Failed to load transactions:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const formatCurrency = (amount: number, currency: string) => {
-    const currencyInfo = CURRENCIES.find(c => c.code === currency)
-    return `${currencyInfo?.symbol || ''}${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  }
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const filteredTransactions = useMemo(() => {
+    const query = search.toLowerCase()
+    return transactions.filter((tx) => {
+      const matchesFilter = filter === 'ALL' || tx.type === filter
+      const searchable = [
+        tx.id,
+        tx.type,
+        tx.status,
+        tx.receiverUser?.name,
+        tx.receiverUser?.email,
+        tx.senderUser?.name,
+        tx.senderUser?.email,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return matchesFilter && (!query || searchable.includes(query))
     })
-  }
-
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesFilter = filter === 'ALL' || tx.type === filter
-    const matchesSearch = search === '' || 
-      tx.receiverUser?.name.toLowerCase().includes(search.toLowerCase()) ||
-      tx.receiverUser?.email.toLowerCase().includes(search.toLowerCase()) ||
-      tx.id.toLowerCase().includes(search.toLowerCase())
-    return matchesFilter && matchesSearch
-  })
+  }, [filter, search, transactions])
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-teal-500" />
       </div>
     )
   }
 
   return (
-    <div className="py-8">
-      <div className="container-custom">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Transaction History</h1>
+    <div className="mx-auto max-w-7xl">
+      <PageHeader
+        title="Transactions"
+        description="Search every on-ramp, withdrawal, and internal transfer with settlement status."
+      />
 
-        {/* Filters */}
-        <div className="card mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="input-field pl-10 w-full"
-              />
-            </div>
-            <div className="flex gap-2">
+      <div className="surface mb-6 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search by recipient, status, type, or transaction ID"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="input-field pl-10"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {filters.map((item) => (
               <button
-                onClick={() => setFilter('ALL')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  filter === 'ALL'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                key={item.value}
+                onClick={() => setFilter(item.value)}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                  filter === item.value
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                All
+                <Filter size={15} />
+                {item.label}
               </button>
-              <button
-                onClick={() => setFilter('ONRAMP')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  filter === 'ONRAMP'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Added
-              </button>
-              <button
-                onClick={() => setFilter('OFFRAMP')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  filter === 'OFFRAMP'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Withdrawn
-              </button>
-              <button
-                onClick={() => setFilter('INTERNAL')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  filter === 'INTERNAL'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Sent
-              </button>
-            </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Transactions List */}
-        <div className="card">
-          {filteredTransactions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No transactions found</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredTransactions.map((tx) => (
-                <div
+      <div className="surface overflow-hidden">
+        {filteredTransactions.length === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <p className="font-semibold text-slate-950">No transactions found</p>
+            <p className="mt-2 text-sm text-slate-500">Try a different search or filter.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {filteredTransactions.map((tx) => {
+              const isOnRamp = tx.type === 'ONRAMP'
+              const Icon = isOnRamp ? ArrowDownLeft : ArrowUpRight
+
+              return (
+                <button
                   key={tx.id}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition cursor-pointer"
                   onClick={() => router.push(`/transactions/${tx.id}`)}
+                  className="grid w-full gap-4 p-5 text-left transition hover:bg-slate-50 md:grid-cols-[1fr_auto_auto]"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      tx.type === 'ONRAMP' ? 'bg-green-100' :
-                      tx.type === 'OFFRAMP' ? 'bg-red-100' :
-                      'bg-blue-100'
-                    }`}>
-                      {tx.type === 'ONRAMP' ? (
-                        <ArrowDownLeft className="text-green-600" size={20} />
-                      ) : (
-                        <ArrowUpRight className={
-                          tx.type === 'OFFRAMP' ? 'text-red-600' : 'text-blue-600'
-                        } size={20} />
-                      )}
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="icon-tile">
+                      <Icon size={18} className={isOnRamp ? 'text-emerald-600' : 'text-slate-700'} />
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {tx.type === 'ONRAMP' ? 'Money Added' :
-                         tx.type === 'OFFRAMP' ? 'Withdrawal' :
-                         `To ${tx.receiverUser?.name || 'Unknown'}`}
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-950">
+                        {transactionTitle(tx.type, tx.receiverUser?.name)}
                       </p>
-                      <p className="text-sm text-gray-600">{formatDate(tx.createdAt)}</p>
-                      <p className="text-xs text-gray-500 mt-1">ID: {tx.id.slice(0, 8)}...</p>
+                      <p className="text-sm text-slate-500">{formatDate(tx.createdAt)}</p>
+                      <p className="mt-1 truncate text-xs text-slate-400">ID {tx.id}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-bold text-lg ${
-                      tx.type === 'ONRAMP' ? 'text-green-600' : 'text-gray-900'
-                    }`}>
-                      {tx.type === 'ONRAMP' ? '+' : '-'}
-                      {formatCurrency(Number(tx.amount), tx.currency)}
+                  <div className="md:text-right">
+                    <p className={`font-semibold ${isOnRamp ? 'text-emerald-600' : 'text-slate-950'}`}>
+                      {transactionSign(tx.type)}
+                      {formatCurrency(tx.amount, tx.currency)}
                     </p>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                      tx.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                      tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {tx.status}
-                    </span>
+                    <p className="text-xs text-slate-500">{tx.currency}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  <div className="md:text-right">
+                    <StatusBadge status={tx.status} />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )

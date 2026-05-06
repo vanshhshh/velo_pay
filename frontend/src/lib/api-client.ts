@@ -60,6 +60,10 @@ class APIClient {
     return this.client.post('/auth/google', { token });
   }
 
+  devLogin() {
+    return this.client.post('/auth/dev-login');
+  }
+
   getCurrentUser() {
     return this.client.get('/auth/me');
   }
@@ -67,6 +71,10 @@ class APIClient {
   // Transak
   createOnRampWidget(data: { amount: number; currency: string }) {
     return this.client.post('/transak/on-ramp/widget', data);
+  }
+
+  completeOnRampWidget(data: { sessionId: string; orderId?: string }) {
+    return this.client.post('/transak/on-ramp/complete', data);
   }
 
   createOffRampWidget(data: {

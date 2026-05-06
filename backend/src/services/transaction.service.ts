@@ -185,6 +185,14 @@ export class TransactionService {
             { receiverUserId: userId }
           ]
         },
+        include: {
+          senderUser: {
+            select: { id: true, name: true, email: true }
+          },
+          receiverUser: {
+            select: { id: true, name: true, email: true }
+          }
+        },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit
@@ -221,6 +229,14 @@ export class TransactionService {
           { senderUserId: userId },
           { receiverUserId: userId }
         ]
+      },
+      include: {
+        senderUser: {
+          select: { id: true, name: true, email: true }
+        },
+        receiverUser: {
+          select: { id: true, name: true, email: true }
+        }
       }
     })
 
@@ -231,12 +247,93 @@ export class TransactionService {
     return transaction
   }
 
+  async completeOnRampSession(
+    userId: string,
+    sessionId: string,
+    orderId?: string
+  ) {
+    const transaction = await prisma.transaction.findFirst({
+      where: {
+        transakSessionId: sessionId,
+        senderUserId: userId,
+        type: 'ONRAMP'
+      }
+    })
+
+    if (!transaction) {
+      throw new AppError(404, 'On-ramp session not found')
+    }
+
+    if (transaction.status === 'COMPLETED') {
+      return transaction
+    }
+
+    if (transaction.status === 'FAILED') {
+      throw new AppError(400, 'On-ramp session has already failed')
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const pendingTransaction = await tx.transaction.findFirst({
+        where: {
+          id: transaction.id,
+          status: 'PENDING'
+        }
+      })
+
+      if (!pendingTransaction) {
+        return tx.transaction.findUniqueOrThrow({
+          where: { id: transaction.id }
+        })
+      }
+
+      if (!pendingTransaction.receiverWalletId) {
+        throw new AppError(400, 'On-ramp receiver wallet is missing')
+      }
+
+      const claimed = await tx.transaction.updateMany({
+        where: {
+          id: pendingTransaction.id,
+          status: 'PENDING'
+        },
+        data: {
+          status: 'COMPLETED',
+          transakOrderId: orderId ?? pendingTransaction.transakOrderId,
+          completedAt: new Date(),
+          failureReason: null
+        }
+      })
+
+      if (claimed.count === 0) {
+        return tx.transaction.findUniqueOrThrow({
+          where: { id: transaction.id }
+        })
+      }
+
+      await tx.wallet.update({
+        where: { id: pendingTransaction.receiverWalletId },
+        data: {
+          balance: {
+            increment: pendingTransaction.amount
+          }
+        }
+      })
+
+      return tx.transaction.findUniqueOrThrow({
+        where: { id: pendingTransaction.id }
+      })
+    })
+  }
+
   /* =====================================================
      TRANSAK WEBHOOK HANDLER
   ===================================================== */
   async handleTransakWebhook(event: string, payload: any) {
-    const sessionId = payload?.sessionId
-    const orderId = payload?.id
+    const sessionId =
+      payload?.sessionId ??
+      payload?.session_id ??
+      payload?.widgetSessionId ??
+      payload?.data?.sessionId
+    const orderId = payload?.id ?? payload?.orderId ?? payload?.order_id
 
     if (!sessionId) return
 
@@ -249,7 +346,12 @@ export class TransactionService {
       return
     }
 
-    if (event === 'ORDER_COMPLETED' && transaction.status === 'COMPLETED') {
+    const isCompletedEvent =
+      event === 'ORDER_COMPLETED' || event === 'TRANSAK_ORDER_SUCCESSFUL'
+    const isFailedEvent =
+      event === 'ORDER_FAILED' || event === 'TRANSAK_ORDER_FAILED'
+
+    if (isCompletedEvent && transaction.status === 'COMPLETED') {
       logger.info('Duplicate ORDER_COMPLETED webhook ignored', {
         transactionId: transaction.id,
         sessionId,
@@ -258,7 +360,7 @@ export class TransactionService {
       return
     }
 
-    if (event === 'ORDER_FAILED' && transaction.status === 'FAILED') {
+    if (isFailedEvent && transaction.status === 'FAILED') {
       logger.info('Duplicate ORDER_FAILED webhook ignored', {
         transactionId: transaction.id,
         sessionId,
@@ -267,7 +369,7 @@ export class TransactionService {
       return
     }
 
-    if (event === 'ORDER_FAILED' && transaction.status === 'COMPLETED') {
+    if (isFailedEvent && transaction.status === 'COMPLETED') {
       logger.warn('ORDER_FAILED received for completed transaction, ignoring', {
         transactionId: transaction.id,
         sessionId,
@@ -276,47 +378,24 @@ export class TransactionService {
       return
     }
 
-    if (event === 'ORDER_COMPLETED') {
+    if (isCompletedEvent) {
       await prisma.$transaction(async (tx) => {
-        if (transaction.type === 'ONRAMP' && transaction.receiverWalletId) {
-          const wallet = await tx.wallet.findUnique({
-            where: { id: transaction.receiverWalletId }
-          })
-
-          if (wallet) {
-            await tx.wallet.update({
-              where: { id: wallet.id },
-              data: {
-                balance:
-                  Number(wallet.balance) + Number(transaction.amount)
-              }
-            })
+        const pendingTransaction = await tx.transaction.findFirst({
+          where: {
+            id: transaction.id,
+            status: 'PENDING'
           }
+        })
+
+        if (!pendingTransaction) {
+          return
         }
 
-        if (transaction.type === 'OFFRAMP' && transaction.senderWalletId) {
-          const wallet = await tx.wallet.findUnique({
-            where: { id: transaction.senderWalletId }
-          })
-
-          if (!wallet) {
-            throw new AppError(404, 'Sender wallet not found')
-          }
-
-          if (Number(wallet.balance) < Number(transaction.amount)) {
-            throw new AppError(400, 'Insufficient balance for off-ramp settlement')
-          }
-
-          await tx.wallet.update({
-            where: { id: wallet.id },
-            data: {
-              balance: Number(wallet.balance) - Number(transaction.amount)
-            }
-          })
-        }
-
-        await tx.transaction.update({
-          where: { id: transaction.id },
+        const claimed = await tx.transaction.updateMany({
+          where: {
+            id: pendingTransaction.id,
+            status: 'PENDING'
+          },
           data: {
             status: 'COMPLETED',
             transakOrderId: orderId,
@@ -324,12 +403,48 @@ export class TransactionService {
             failureReason: null
           }
         })
+
+        if (claimed.count === 0) {
+          return
+        }
+
+        if (pendingTransaction.type === 'ONRAMP' && pendingTransaction.receiverWalletId) {
+          await tx.wallet.update({
+            where: { id: pendingTransaction.receiverWalletId },
+            data: {
+              balance: {
+                increment: pendingTransaction.amount
+              }
+            }
+          })
+        }
+
+        if (pendingTransaction.type === 'OFFRAMP' && pendingTransaction.senderWalletId) {
+          const wallet = await tx.wallet.findUnique({
+            where: { id: pendingTransaction.senderWalletId }
+          })
+
+          if (!wallet) {
+            throw new AppError(404, 'Sender wallet not found')
+          }
+
+          if (Number(wallet.balance) < Number(pendingTransaction.amount)) {
+            throw new AppError(400, 'Insufficient balance for off-ramp settlement')
+          }
+
+          await tx.wallet.update({
+            where: { id: wallet.id },
+            data: {
+              balance: Number(wallet.balance) - Number(pendingTransaction.amount)
+            }
+          })
+        }
       })
 
       return
     }
 
-    if (event === 'ORDER_FAILED') {
+    if (isFailedEvent) {
       await prisma.transaction.update({
         where: { id: transaction.id },
         data: {

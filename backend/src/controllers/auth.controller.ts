@@ -14,6 +14,78 @@ const expiresIn: jwt.SignOptions['expiresIn'] =
   (process.env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn']) || '7d';
 
 export class AuthController {
+  async devLogin(req: Request, res: Response): Promise<void> {
+    try {
+      if (process.env.NODE_ENV === 'production') {
+        res.status(404).json({ error: 'Not found' });
+        return;
+      }
+
+      const email = 'dev@velo.local';
+      const name = 'Local Dev';
+      const googleId = 'local-dev-user';
+
+      let user = await prisma.user.findUnique({
+        where: { email },
+        include: { wallet: true }
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email,
+            name,
+            googleId,
+            status: 'ACTIVE'
+          },
+          include: { wallet: true }
+        });
+
+        logger.info('Local dev user created', {
+          userId: user.id,
+          email: user.email
+        });
+      }
+
+      if (!user.wallet) {
+        await walletService.createUserWallet(user.id);
+        user = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { wallet: true }
+        });
+      }
+
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+
+      const jwtToken = jwt.sign(
+        {
+          userId: user!.id,
+          email: user!.email,
+          name: user!.name
+        },
+        jwtSecret,
+        { expiresIn }
+      );
+
+      res.json({
+        user: {
+          id: user!.id,
+          email: user!.email,
+          name: user!.name,
+          balance: parseFloat(user!.wallet?.balance.toString() || '0'),
+          currency: user!.currency
+        },
+        token: jwtToken
+      });
+    } catch (error) {
+      logger.error('Dev login error', { error });
+      res.status(500).json({ error: 'Dev login failed' });
+    }
+  }
+
   async googleAuth(req: Request, res: Response): Promise<void> {
     try {
       const { token } = req.body;

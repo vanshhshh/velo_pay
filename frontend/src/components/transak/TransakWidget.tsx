@@ -8,7 +8,7 @@ type TransakWidgetEventPayload = Record<string, unknown>
 interface TransakWidgetProps {
   widgetUrl: string
   onClose: () => void
-  onSuccess?: () => void
+  onSuccess?: (payload: TransakWidgetEventPayload) => void
   onWalletRedirection?: (payload: TransakWidgetEventPayload) => void
 }
 
@@ -87,7 +87,7 @@ export function TransakWidget({
         eventName === 'TRANSAK_ORDER_SUCCESSFUL' ||
         eventName === 'ORDER_COMPLETED'
       ) {
-        onSuccess?.()
+        onSuccess?.(payload)
       }
     }
 
@@ -98,21 +98,20 @@ export function TransakWidget({
   if (!widgetUrl) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative w-full max-w-3xl h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden">
-        
-        {/* Close Button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+      <div className="relative h-[88vh] w-full max-w-4xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-10 h-10 bg-white rounded-full shadow flex items-center justify-center hover:bg-gray-100 transition"
+          className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
+          aria-label="Close Transak widget"
         >
           <X size={20} />
         </button>
 
-        {/* Transak Iframe */}
         <iframe
           src={widgetUrl}
-          className="w-full h-full border-0"
+          title="Transak payment widget"
+          className="h-full w-full border-0"
           allow="camera; microphone; payment"
         />
       </div>

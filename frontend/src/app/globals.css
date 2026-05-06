@@ -30,7 +30,10 @@
   }
 
   body {
-    @apply bg-white text-gray-900 font-sans antialiased;
+    @apply bg-slate-50 text-slate-950 font-sans antialiased;
+    background:
+      radial-gradient(circle at top left, rgba(20, 184, 166, 0.10), transparent 28rem),
+      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
   }
 }
 
@@ -43,19 +46,27 @@
   }
 
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-900 font-semibold px-6 py-3 rounded-lg border border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-950 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100 disabled:bg-slate-100 disabled:text-slate-500;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply rounded-lg border border-slate-200 bg-white p-6 shadow-sm;
+  }
+
+  .surface {
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+  }
+
+  .icon-tile {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm;
   }
 }
 
@@ -83,4 +94,9 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
+}
+
+::selection {
+  background: #99f6e4;
+  color: #0f172a;
 }

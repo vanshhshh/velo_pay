@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import { TransakService } from '../services/transak.service';
 import { WalletService } from '../services/wallet.service';
 import { CurrencyService } from '../services/currency.service';
+import { TransactionService } from '../services/transaction.service';
 import { logger } from '../config/logger';
 import { prisma } from '../config/database';
 
 const transakService = new TransakService();
 const walletService = new WalletService();
 const currencyService = new CurrencyService();
+const transactionService = new TransactionService();
 
 export class TransakController {
   /**
@@ -68,6 +70,40 @@ export class TransakController {
       logger.error('Create on-ramp widget failed', { error, userId: req.user!.id });
       res.status(error.statusCode || 500).json({
         error: error.message || 'Failed to create payment widget'
+      });
+    }
+  }
+
+  async completeOnRampWidget(req: Request, res: Response): Promise<void> {
+    try {
+      const { sessionId, orderId } = req.body;
+      const userId = req.user!.id;
+
+      if (!sessionId || typeof sessionId !== 'string') {
+        res.status(400).json({ error: 'Session ID is required' });
+        return;
+      }
+
+      const transaction = await transactionService.completeOnRampSession(
+        userId,
+        sessionId,
+        typeof orderId === 'string' ? orderId : undefined
+      );
+
+      logger.info('On-ramp widget completed', {
+        userId,
+        sessionId,
+        transactionId: transaction.id
+      });
+
+      res.json({ transaction });
+    } catch (error: any) {
+      logger.error('Complete on-ramp widget failed', {
+        error,
+        userId: req.user!.id
+      });
+      res.status(error.statusCode || 500).json({
+        error: error.message || 'Failed to complete payment'
       });
     }
   }
