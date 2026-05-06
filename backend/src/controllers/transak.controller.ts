@@ -108,6 +108,40 @@ export class TransakController {
     }
   }
 
+  async completeOffRampWidget(req: Request, res: Response): Promise<void> {
+    try {
+      const { sessionId, orderId } = req.body;
+      const userId = req.user!.id;
+
+      if (!sessionId || typeof sessionId !== 'string') {
+        res.status(400).json({ error: 'Session ID is required' });
+        return;
+      }
+
+      const transaction = await transactionService.completeOffRampSession(
+        userId,
+        sessionId,
+        typeof orderId === 'string' ? orderId : undefined
+      );
+
+      logger.info('Off-ramp widget completed', {
+        userId,
+        sessionId,
+        transactionId: transaction.id
+      });
+
+      res.json({ transaction });
+    } catch (error: any) {
+      logger.error('Complete off-ramp widget failed', {
+        error,
+        userId: req.user!.id
+      });
+      res.status(error.statusCode || 500).json({
+        error: error.message || 'Failed to complete withdrawal'
+      });
+    }
+  }
+
   /**
    * Create widget URL for off-ramp (Withdraw)
    */

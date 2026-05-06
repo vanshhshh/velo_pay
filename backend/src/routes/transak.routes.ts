@@ -10,6 +10,7 @@ router.use(authenticate);
 router.post('/on-ramp/widget', transakController.createOnRampWidget.bind(transakController));
 router.post('/on-ramp/complete', transakController.completeOnRampWidget.bind(transakController));
 router.post('/off-ramp/widget', transakController.createOffRampWidget.bind(transakController));
+router.post('/off-ramp/complete', transakController.completeOffRampWidget.bind(transakController));
 router.get('/currencies', transakController.getSupportedCurrencies.bind(transakController));
 
 export default router;

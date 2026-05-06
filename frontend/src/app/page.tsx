@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import type { FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { apiClient } from '@/lib/api-client'
 import { 
   ArrowRight, 
   Shield, 
@@ -13,11 +15,23 @@ import {
   Star,
   Lock,
   Clock,
-  Users
+  Users,
+  X
 } from 'lucide-react'
+
+declare global {
+  interface Window {
+    google: any
+  }
+}
 
 export default function LandingPage() {
   const router = useRouter()
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -25,6 +39,91 @@ export default function LandingPage() {
       router.push('/dashboard')
     }
   }, [router])
+
+  useEffect(() => {
+    if (!loginOpen) return
+
+    const renderGoogleButton = () => {
+      const target = document.getElementById('google-signin-home')
+      if (!target || !window.google) return
+
+      target.innerHTML = ''
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+      })
+
+      window.google.accounts.id.renderButton(target, {
+        theme: 'outline',
+        size: 'large',
+        width: 340,
+        text: 'continue_with',
+        shape: 'rectangular',
+      })
+    }
+
+    if (window.google) {
+      renderGoogleButton()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = renderGoogleButton
+    document.body.appendChild(script)
+  }, [loginOpen])
+
+  const handleCredentialResponse = async (response: any) => {
+    setLoginLoading(true)
+    setLoginError('')
+    try {
+      const result = await apiClient.googleAuth(response.credential)
+      localStorage.setItem('token', result.data.token)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Login failed:', error)
+      setLoginError('Google login failed. Please try again.')
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  const handleEmailLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setLoginLoading(true)
+    setLoginError('')
+
+    try {
+      const result = await apiClient.emailLogin({
+        email: loginEmail,
+        password: loginPassword,
+      })
+      localStorage.setItem('token', result.data.token)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Email login failed:', error)
+      setLoginError('Invalid email or password.')
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  const handleDevLogin = async () => {
+    setLoginLoading(true)
+    setLoginError('')
+    try {
+      const result = await apiClient.devLogin()
+      localStorage.setItem('token', result.data.token)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Dev login failed:', error)
+      setLoginError('Local dev login failed. Check that the backend is running.')
+    } finally {
+      setLoginLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -44,12 +143,20 @@ export default function LandingPage() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/login" className="text-gray-700 hover:text-primary-600 font-medium">
+              <button
+                type="button"
+                onClick={() => setLoginOpen(true)}
+                className="font-medium text-gray-700 transition hover:text-primary-600"
+              >
                 Sign In
-              </Link>
-              <Link href="/login" className="btn-primary">
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginOpen(true)}
+                className="btn-primary"
+              >
                 Get Started
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -67,10 +174,14 @@ export default function LandingPage() {
               Experience the future of international money transfers.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/login" className="btn-primary text-lg px-8 py-4">
+              <button
+                type="button"
+                onClick={() => setLoginOpen(true)}
+                className="btn-primary text-lg px-8 py-4"
+              >
                 Start Sending Money
                 <ArrowRight className="inline ml-2" size={20} />
-              </Link>
+              </button>
               <a href="#how-it-works" className="btn-secondary text-lg px-8 py-4">
                 Learn More
               </a>
@@ -285,10 +396,14 @@ export default function LandingPage() {
           <p className="text-xl mb-8 text-primary-100 max-w-2xl mx-auto">
             Join millions of users who trust Velo for fast, secure international transfers
           </p>
-          <Link href="/login" className="inline-block bg-white text-primary-600 font-bold px-8 py-4 rounded-lg hover:bg-primary-50 transition text-lg">
+          <button
+            type="button"
+            onClick={() => setLoginOpen(true)}
+            className="inline-flex items-center justify-center bg-white text-primary-600 font-bold px-8 py-4 rounded-lg hover:bg-primary-50 transition text-lg"
+          >
             Create Free Account
             <ArrowRight className="inline ml-2" size={20} />
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -350,6 +465,129 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {loginOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl sm:p-8">
+            <button
+              type="button"
+              onClick={() => setLoginOpen(false)}
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
+              aria-label="Close login"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="mb-8 pr-8">
+              <p className="text-sm font-semibold text-teal-700">Velo account</p>
+              <h2 className="mt-2 text-3xl font-semibold text-slate-950">
+                Welcome back
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Sign in to manage your balance, payments, withdrawals, and
+                on-ramp sessions.
+              </p>
+            </div>
+
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="login-email"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Email
+                </label>
+                <input
+                  id="login-email"
+                  type="email"
+                  value={loginEmail}
+                  onChange={(event) => setLoginEmail(event.target.value)}
+                  autoComplete="email"
+                  required
+                  disabled={loginLoading}
+                  className="input-field"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="login-password"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Password
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={loginPassword}
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                  disabled={loginLoading}
+                  className="input-field"
+                  placeholder="Enter your password"
+                />
+              </div>
+              {loginError && (
+                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {loginError}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="btn-primary w-full justify-center"
+              >
+                Sign in
+              </button>
+            </form>
+
+            <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
+              <span className="h-px flex-1 bg-slate-200" />
+              or
+              <span className="h-px flex-1 bg-slate-200" />
+            </div>
+
+            <div id="google-signin-home" className="mb-6 flex justify-center" />
+
+            {process.env.NODE_ENV !== 'production' && (
+              <button
+                type="button"
+                onClick={handleDevLogin}
+                disabled={loginLoading}
+                className="btn-secondary w-full justify-center"
+              >
+                Continue in local dev
+              </button>
+            )}
+
+            {loginLoading && (
+              <div className="mt-5 text-center">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-teal-500" />
+                <p className="mt-2 text-sm text-slate-600">Signing in...</p>
+              </div>
+            )}
+
+            <p className="mt-8 text-center text-xs leading-5 text-slate-500">
+              By signing in, you agree to our{' '}
+              <Link
+                href="/terms"
+                className="font-semibold text-slate-900 hover:text-teal-700"
+              >
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link
+                href="/privacy"
+                className="font-semibold text-slate-900 hover:text-teal-700"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

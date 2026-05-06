@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
-import { CURRENCIES } from '@/lib/constants'
 import { TransakWidget } from '@/components/transak/TransakWidget'
-import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Loader2 } from 'lucide-react'
 
 type WalletRedirectionInfo = {
   orderId?: string
@@ -23,12 +22,8 @@ function readField(
 ): string | undefined {
   for (const key of keys) {
     const value = source[key]
-    if (typeof value === 'string' && value.trim().length > 0) {
-      return value
-    }
-    if (typeof value === 'number') {
-      return value.toString()
-    }
+    if (typeof value === 'string' && value.trim().length > 0) return value
+    if (typeof value === 'number') return value.toString()
   }
   return undefined
 }
@@ -66,278 +61,153 @@ function extractWalletRedirectionInfo(
 
 export default function WithdrawPage() {
   const router = useRouter()
-  const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState('USD')
-  const [accountHolderName, setAccountHolderName] = useState('')
-  const [bankName, setBankName] = useState('')
-  const [accountNumber, setAccountNumber] = useState('')
-  const [routingNumber, setRoutingNumber] = useState('')
-  const [loading, setLoading] = useState(false)
+  const launchedRef = useRef(false)
+  const [loading, setLoading] = useState(true)
+  const [settling, setSettling] = useState(false)
   const [widgetUrl, setWidgetUrl] = useState('')
+  const [sessionId, setSessionId] = useState('')
+  const [error, setError] = useState('')
   const [walletRedirectionInfo, setWalletRedirectionInfo] =
     useState<WalletRedirectionInfo | null>(null)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const params = new URLSearchParams(window.location.search)
-    const queryInfo = extractWalletRedirectionInfo(
-      Object.fromEntries(params.entries())
-    )
-
-    const hasData = Object.values(queryInfo).some(Boolean)
-    if (!hasData) return
-
-    setWalletRedirectionInfo(queryInfo)
-
-    if (!amount && queryInfo.fiatAmount) {
-      setAmount(queryInfo.fiatAmount)
-    }
-
-    if (
-      queryInfo.fiatCurrency &&
-      CURRENCIES.some((item) => item.code === queryInfo.fiatCurrency)
-    ) {
-      setCurrency(queryInfo.fiatCurrency)
-    }
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const openWidget = useCallback(async () => {
     setLoading(true)
+    setError('')
+    setWalletRedirectionInfo(null)
 
     try {
       const response = await apiClient.createOffRampWidget({
-        amount: parseFloat(amount),
-        currency,
+        amount: 10,
+        currency: 'INR',
         bankDetails: {
-          accountHolderName,
-          bankName,
-          accountNumber,
-          routingNumber,
-          country: 'US',
-          currency
-        }
+          accountHolderName: 'Transak User',
+          bankName: 'Handled by Transak',
+          accountNumber: '0000000000',
+          routingNumber: '000000000',
+          country: 'IN',
+          currency: 'INR',
+        },
       })
+
       setWidgetUrl(response.data.widgetUrl)
+      setSessionId(response.data.sessionId)
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Withdrawal failed')
+      setError(error.response?.data?.error || 'Withdrawal failed')
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  useEffect(() => {
+    if (launchedRef.current) return
+    launchedRef.current = true
+    openWidget()
+  }, [openWidget])
+
+  const completeWithdrawal = async (orderId?: string) => {
+    if (!sessionId) {
+      setWidgetUrl('')
+      router.push('/dashboard')
+      return
+    }
+
+    setSettling(true)
+    setError('')
+
+    try {
+      await apiClient.completeOffRampWidget({ sessionId, orderId })
+      setWidgetUrl('')
+      router.push('/dashboard')
+    } catch (error: any) {
+      setError(
+        error.response?.data?.error ||
+          'Withdrawal finished, but the balance could not be updated yet.'
+      )
+      setWidgetUrl('')
+    } finally {
+      setSettling(false)
+    }
   }
 
-  const handleClose = () => {
-    setWidgetUrl('')
-    router.push('/dashboard')
+  const handleSuccess = async (payload: Record<string, unknown>) => {
+    const data =
+      payload.data && typeof payload.data === 'object'
+        ? (payload.data as Record<string, unknown>)
+        : payload
+    await completeWithdrawal(readField(data, ['id', 'orderId', 'order_id']))
   }
 
-  const handleSuccess = () => {
-    setWidgetUrl('')
-    router.push('/dashboard')
-  }
-
-  const handleWalletRedirection = (payload: Record<string, unknown>) => {
+  const handleWalletRedirection = async (payload: Record<string, unknown>) => {
     const info = extractWalletRedirectionInfo(payload)
     setWalletRedirectionInfo(info)
-
-    if (!amount && info.fiatAmount) {
-      setAmount(info.fiatAmount)
-    }
-
-    if (info.fiatCurrency && CURRENCIES.some((item) => item.code === info.fiatCurrency)) {
-      setCurrency(info.fiatCurrency)
-    }
-
-    setWidgetUrl('')
+    await completeWithdrawal(info.orderId)
   }
 
   return (
-    <div className="py-8">
-      <div className="container-custom max-w-2xl">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition"
-        >
-          <ArrowLeft size={20} className="mr-2" />
-          Back to Dashboard
-        </button>
+    <div className="mx-auto max-w-3xl">
+      <button
+        onClick={() => router.push('/dashboard')}
+        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-950"
+      >
+        <ArrowLeft size={18} />
+        Back to dashboard
+      </button>
 
-        <div className="card">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-              <ArrowUpRight className="text-red-600" size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Withdraw to Bank</h1>
-              <p className="text-gray-600">Transfer money to your bank account</p>
-            </div>
+      <section className="surface p-6 sm:p-8">
+        <div className="flex items-start gap-4">
+          <div className="icon-tile text-rose-600">
+            <ArrowUpRight size={22} />
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Currency
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="input-field"
-              >
-                {CURRENCIES.map((curr) => (
-                  <option key={curr.code} value={curr.code}>
-                    {curr.flag} {curr.name} ({curr.symbol})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
-                  {CURRENCIES.find(c => c.code === currency)?.symbol}
-                </span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="input-field pl-10 text-lg"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Bank Account Details</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Holder Name
-                  </label>
-                  <input
-                    type="text"
-                    value={accountHolderName}
-                    onChange={(e) => setAccountHolderName(e.target.value)}
-                    className="input-field"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="input-field"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Number
-                  </label>
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    className="input-field"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Routing Number
-                  </label>
-                  <input
-                    type="text"
-                    value={routingNumber}
-                    onChange={(e) => setRoutingNumber(e.target.value)}
-                    className="input-field"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-900">
-                <strong>Processing Time:</strong> Withdrawals typically complete within 1-3 business days
-              </p>
-            </div>
-
-            {walletRedirectionInfo && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                <p className="text-sm font-semibold text-blue-900">
-                  Complete Crypto Transfer
-                </p>
-                <p className="text-sm text-blue-800">
-                  Use your wallet to send the required crypto to continue this withdrawal.
-                </p>
-                {walletRedirectionInfo.walletAddress && (
-                  <p className="text-sm text-blue-900 break-all">
-                    <strong>Wallet:</strong> {walletRedirectionInfo.walletAddress}
-                  </p>
-                )}
-                {(walletRedirectionInfo.cryptoAmount || walletRedirectionInfo.cryptoCurrency) && (
-                  <p className="text-sm text-blue-900">
-                    <strong>Amount:</strong>{' '}
-                    {walletRedirectionInfo.cryptoAmount || 'N/A'}{' '}
-                    {walletRedirectionInfo.cryptoCurrency || ''}
-                  </p>
-                )}
-                {walletRedirectionInfo.network && (
-                  <p className="text-sm text-blue-900">
-                    <strong>Network:</strong> {walletRedirectionInfo.network}
-                  </p>
-                )}
-                {walletRedirectionInfo.orderId && (
-                  <p className="text-sm text-blue-900 break-all">
-                    <strong>Order ID:</strong> {walletRedirectionInfo.orderId}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => router.push('/dashboard')}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary flex-1"
-              >
-                {loading ? 'Processing...' : 'Continue to Withdrawal'}
-              </button>
-            </div>
-          </form>
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-950">
+              Opening withdrawal
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Transak will collect the withdrawal amount, crypto transfer, and
+              payout details in its secure widget.
+            </p>
+          </div>
         </div>
 
-        {widgetUrl && (
-          <TransakWidget
-            widgetUrl={widgetUrl}
-            onClose={handleClose}
-            onSuccess={handleSuccess}
-            onWalletRedirection={handleWalletRedirection}
-          />
+        {(loading || settling) && (
+          <div className="mt-8 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700">
+            <Loader2 size={18} className="animate-spin text-teal-600" />
+            {loading ? 'Opening Transak widget...' : 'Finalizing withdrawal...'}
+          </div>
         )}
-      </div>
+
+        {walletRedirectionInfo && (
+          <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            Transak returned withdrawal transfer details. Finalizing the Velo
+            transaction now.
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 p-4">
+            <p className="text-sm text-rose-700">{error}</p>
+            <button
+              type="button"
+              onClick={openWidget}
+              className="btn-primary mt-4"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+      </section>
+
+      {widgetUrl && (
+        <TransakWidget
+          widgetUrl={widgetUrl}
+          onClose={() => {
+            setWidgetUrl('')
+            router.push('/dashboard')
+          }}
+          onSuccess={handleSuccess}
+          onWalletRedirection={handleWalletRedirection}
+        />
+      )}
     </div>
   )
 }

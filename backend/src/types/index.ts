@@ -39,6 +39,8 @@ export interface TransakWidgetRequest {
   productsAvailed: 'BUY' | 'SELL';
   fiatCurrency?: string;
   fiatAmount?: number;
+  defaultFiatCurrency?: string;
+  defaultFiatAmount?: number;
   cryptoCurrency?: string;
   walletAddress?: string;
   network?: string;

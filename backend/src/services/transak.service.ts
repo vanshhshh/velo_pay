@@ -31,23 +31,34 @@ export class TransakService {
       const redirectURL = request.redirectURL
         ? new URL(request.redirectURL, frontendBaseUrl).toString()
         : new URL(defaultRedirectPath, frontendBaseUrl).toString()
+      const isSell = request.productsAvailed === 'SELL'
+      const widgetParams: Record<string, unknown> = {
+        apiKey: TRANSAK_API_KEY,
+        referrerDomain,
+        productsAvailed: request.productsAvailed,
+        cryptoCurrencyCode: request.cryptoCurrency || 'USDC',
+        network: request.network || 'ethereum',
+      }
+
+      if (isSell) {
+        widgetParams.defaultFiatCurrency =
+          request.defaultFiatCurrency ?? request.fiatCurrency
+        widgetParams.defaultFiatAmount =
+          request.defaultFiatAmount ?? request.fiatAmount
+        widgetParams.walletRedirection = request.walletRedirection ?? true
+      } else {
+        widgetParams.fiatCurrency = request.fiatCurrency
+        widgetParams.fiatAmount = request.fiatAmount
+        widgetParams.walletAddress = request.walletAddress
+        widgetParams.disableWalletAddressForm = true
+        widgetParams.walletRedirection = false
+        widgetParams.redirectURL = redirectURL
+      }
 
       const response = await axios.post(
         `${TRANSAK_API_URL}/api/v2/auth/session`,
         {
-          widgetParams: {
-            apiKey: TRANSAK_API_KEY,
-            referrerDomain,
-            productsAvailed: request.productsAvailed,
-            fiatCurrency: request.fiatCurrency,
-            fiatAmount: request.fiatAmount?.toString(),
-            cryptoCurrencyCode: request.cryptoCurrency || 'USDC',
-            walletAddress: request.walletAddress,
-            disableWalletAddressForm: true,
-            network: request.network || 'ethereum',
-            walletRedirection: request.walletRedirection ?? false,
-            redirectURL,
-          },
+          widgetParams,
           landingPage: 'HOME',
         },
         {

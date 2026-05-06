@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import jwt, {Secret} from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../config/database';
 import { logger } from '../config/logger';
 import { WalletService } from '../services/wallet.service';
@@ -14,6 +15,83 @@ const expiresIn: jwt.SignOptions['expiresIn'] =
   (process.env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn']) || '7d';
 
 export class AuthController {
+  async emailLogin(req: Request, res: Response): Promise<void> {
+    try {
+      const email = String(req.body.email || '').trim().toLowerCase();
+      const password = String(req.body.password || '');
+
+      if (!email || !password) {
+        res.status(400).json({ error: 'Email and password are required' });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: { wallet: true }
+      });
+
+      if (!user || !user.passwordHash) {
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
+      }
+
+      const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+      if (!passwordMatches) {
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
+      }
+
+      let userWithWallet = user;
+      if (!userWithWallet.wallet) {
+        await walletService.createUserWallet(userWithWallet.id);
+        userWithWallet = (await prisma.user.findUnique({
+          where: { id: userWithWallet.id },
+          include: { wallet: true }
+        }))!;
+      }
+
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+
+      const jwtToken = jwt.sign(
+        {
+          userId: userWithWallet.id,
+          email: userWithWallet.email,
+          name: userWithWallet.name
+        },
+        jwtSecret,
+        { expiresIn }
+      );
+
+      await prisma.auditLog.create({
+        data: {
+          userId: userWithWallet.id,
+          action: 'USER_LOGIN',
+          entity: 'User',
+          entityId: userWithWallet.id,
+          ipAddress: req.ip,
+          userAgent: req.get('user-agent')
+        }
+      });
+
+      res.json({
+        user: {
+          id: userWithWallet.id,
+          email: userWithWallet.email,
+          name: userWithWallet.name,
+          balance: parseFloat(userWithWallet.wallet?.balance.toString() || '0'),
+          currency: userWithWallet.currency
+        },
+        token: jwtToken
+      });
+    } catch (error) {
+      logger.error('Email login error', { error });
+      res.status(500).json({ error: 'Email login failed' });
+    }
+  }
+
   async devLogin(req: Request, res: Response): Promise<void> {
     try {
       if (process.env.NODE_ENV === 'production') {

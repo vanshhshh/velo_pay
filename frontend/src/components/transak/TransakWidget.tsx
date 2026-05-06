@@ -78,7 +78,10 @@ export function TransakWidget({
 
       const { eventName, payload } = transakEvent
 
-      if (eventName === 'WALLET_REDIRECTION') {
+      if (
+        eventName === 'WALLET_REDIRECTION' ||
+        eventName === 'TRANSAK_WALLET_REDIRECTION'
+      ) {
         onWalletRedirection?.(payload)
         return
       }

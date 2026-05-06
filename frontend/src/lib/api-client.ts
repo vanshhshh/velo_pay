@@ -60,6 +60,10 @@ class APIClient {
     return this.client.post('/auth/google', { token });
   }
 
+  emailLogin(data: { email: string; password: string }) {
+    return this.client.post('/auth/email', data);
+  }
+
   devLogin() {
     return this.client.post('/auth/dev-login');
   }
@@ -83,6 +87,10 @@ class APIClient {
     bankDetails: BankDetails;
   }) {
     return this.client.post('/transak/off-ramp/widget', data);
+  }
+
+  completeOffRampWidget(data: { sessionId: string; orderId?: string }) {
+    return this.client.post('/transak/off-ramp/complete', data);
   }
 
   getSupportedCurrencies() {
